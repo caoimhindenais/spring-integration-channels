@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+
+                           http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+
+    <int:message-history/>
+
+    <int:inbound-channel-adapter id="generateMessage" ref="dataService" method="generate" channel="channel">
+        <int:poller fixed-delay="1000"/>
+    </int:inbound-channel-adapter>
+
+    <!-- Option 1,        Direct Channel
+            - Point to Point
+       <int:channel id="channel"/>
+    -->
+
+    <!-- Option 2 Publish Subscribe without executor
+        <int:publish-subscribe-channel id="channel"/>
+    -->
+
+    <int:publish-subscribe-channel id="channel" task-executor="executor"/>
+    <task:executor id="executor" pool-size="10"/>
+
+    <int:poller id="default-poller" default="true" fixed-delay="1000"/>
+
+    <int:service-activator ref="printService" method="print" input-channel="channel"/>
+
+    <int:service-activator ref="hashService" method="calculate" input-channel="channel"/>
+
+    <int:service-activator ref="slowService" method="slooow" input-channel="channel"/>
+
+
+</beans>
