@@ -1,5 +1,6 @@
 # spring-integration-channels
-Playground for different Spring Integration Channel Usage
+
+**When do I use what channel?**
 
 > While the Message plays the crucial role of encapsulating data, it is the MessageChannel that decouples message producers from message consumers.
 https://docs.spring.io/spring-integration/docs/current/reference/html/
@@ -12,6 +13,7 @@ Keep in mind that
 
 ### Playground
 
+_Big Picture_ of this simple service
 
 ![Alt text](docs/overview.png?raw=true "Title")
 
@@ -24,6 +26,8 @@ Keep in mind that
 * The key motivation for providing a channel implementation with this behavior is to support transactions that must span across the channel while still benefiting from the abstraction and loose coupling that the channel provides
 * The DirectChannel internally delegates to a Message Dispatcher to invoke its subscribed Message Handlers, and that dispatcher can have a load-balancing strategy exposed via load-balancer or load-balancer-ref attributes (mutually exclusive).  Messages are sent in a round robin fashion to their subscribers
 
+
+Here we see the message dispatched in a **round robin** fashion on the scheduler thread. It's import to note that only **one** service gets the message
 ![Alt text](docs/direct-channel.png?raw=true "Title")
 
 
@@ -32,6 +36,7 @@ Keep in mind that
 * The PublishSubscribeChannel implementation broadcasts any Message sent to it to all of its subscribed handlers. 
 * You can also specify the task-executor used for publishing messages (if none is specified, it publishes in the sender’s thread)
 
+Here we see messages dispatched in too **all** three service. Again the scheduler thread is used.
 ![Alt text](docs/publish-subscribe-channel.png?raw=true "Title")
 
 
@@ -44,5 +49,7 @@ Keep in mind that
 
 * If you provide an executor the message dispatching will be handled by the a thread in the executor's pool
 
+Again here we see the message dispatched in too **all** three service. But its a *different executor thread* per service.
+In Spring the **thread** is the transaction boundary. 
 ![Alt text](docs/publish-subscribe-channel-with-executor.png?raw=true "Title")
     
